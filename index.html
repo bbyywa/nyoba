@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" type="text/css" href="style10.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Task Reminder</title>
+    <!-- <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 500px;
+            margin: 50px auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        input[type="text"], input[type="time"] {
+            width: calc(100% - 110px);
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        button {
+            padding: 10px;
+            border: none;
+            background-color: #28a745;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+        }
+
+        li button {
+            background-color: #dc3545;
+            border: none;
+            padding: 5px;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        li button:hover {
+            background-color: #c82333;
+        }
+    </style> -->
+</head>
+<body>
+    <div class="container">
+        <h1>Daily Task Reminder</h1>
+        <input type="text" id="taskInput" placeholder="Add your task here...">
+        <input type="time" id="taskTime" placeholder="Set time">
+        <button onclick="addTask()">Add Task</button>
+        <ul id="taskList"></ul>
+    </div>
+
+    <script>
+        function addTask() {
+            const taskInput = document.getElementById('taskInput');
+            const taskTime = document.getElementById('taskTime');
+            const taskText = taskInput.value.trim();
+            const timeValue = taskTime.value;
+
+            if (taskText === '' || timeValue === '') {
+                alert('Please enter a task and set a time!');
+                return;
+            }
+
+            // Request permission for notifications if it hasn't been done yet
+            Notification.requestPermission().then(permission => {
+                if (permission === 'granted') {
+                    const taskList = document.getElementById('taskList');
+                    const li = document.createElement('li');
+
+                    li.innerHTML = `
+                        ${taskText} at ${timeValue} <button onclick="removeTask(this)">Remove</button>
+                    `;
+
+                    taskList.appendChild(li);
+
+                    // Schedule notification
+                    scheduleNotification(taskText, timeValue);
+                } else {
+                    alert('Notification permission denied. Please enable it in your browser settings.');
+                }
+            });
+
+            taskInput.value = ''; // Clear the input field
+            taskTime.value = '';  // Clear the time field
+        }
+
+        function scheduleNotification(taskText, timeValue) {
+            const now = new Date();
+            const [hours, minutes] = timeValue.split(':');
+            const notifyTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes);
+
+            if (notifyTime > now) {
+                const timeout = notifyTime.getTime() - now.getTime();
+                setTimeout(() => {
+                    showNotification(taskText);
+                }, timeout);
+            } else {
+                alert('The time you set has already passed!');
+            }
+        }
+
+        function showNotification(taskText) {
+            if (Notification.permission === 'granted') {
+                const notification = new Notification('Task Reminder', {
+                    body: `It's time for: ${taskText}`,
+                    icon: 'https://via.placeholder.com/150' // Ganti dengan URL ikon jika diinginkan
+                });
+            }
+        }
+
+        function removeTask(button) {
+            const li = button.parentNode;
+            li.remove();
+        }
+    </script>
+</body>
+</html>
